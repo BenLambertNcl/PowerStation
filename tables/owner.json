@@ -9,11 +9,11 @@
   ],
   "join_with": ["car.json"],
   "output_columns": [
-    "id",
-    "name",
-    "address",
-    "phoneNumber",
-    "car_id",
-    "car_make"
+    { "name": "id" },
+    { "name": "name" },
+    { "name": "address" },
+    { "name": "phoneNumber" },
+    { "name": "car_id" },
+    { "name": "car_make", "as": "make" }
   ]
 }

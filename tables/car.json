@@ -16,14 +16,14 @@
     { "name": "productionDate", "type": "date" }
   ],
   "output_columns": [
-    "id",
-    "make",
-    "model",
-    "engine",
-    "price",
-    "productionDate",
-    "from",
-    "to",
-    "is_current"
+    { "name": "id" },
+    { "name": "make" },
+    { "name": "model" },
+    { "name": "engine" },
+    { "name": "price" },
+    { "name": "productionDate" },
+    { "name": "from" },
+    { "name": "to" },
+    { "name": "is_current", "as": "isCurrent" }
   ]
 }

@@ -61,12 +61,12 @@ def join_dataframes(spark, join_table, df):
     create_join_col: Callable[[Row], Row] = lambda row: Row(**{**(row.asDict()), "joining_id": rd.randint(1, 10 + 1)})
     df_with_joining_col = df.rdd.map(create_join_col).toDF()
     return df_with_joining_col.join(joining_df_with_renamed_cols,
-             col("joining_id") == col(f"{table_name}_row_num"),
-             'left')
+                                    col("joining_id") == col(f"{table_name}_row_num"),
+                                    'left')
 
 
 def generate(spark: SparkSession, config):
-    output_columns = ["row_num"] + config["output_columns"]
+    output_columns = ["row_num"] + list(map(lambda column: column["name"], config["output_columns"]))
     rows = config["count"]
 
     df: DataFrame = spark.range(1, rows + 1).withColumnRenamed("id", "row_num") \
@@ -77,16 +77,19 @@ def generate(spark: SparkSession, config):
 
     df = df.select(output_columns)
 
+    for column in filter(lambda col: col.get("as", None) is not None, config["output_columns"]):
+        df = df.withColumnRenamed(column["name"], column["as"])
+
     df.coalesce(1).write.mode("overwrite").option("multiline", "false").json(f'output/{config["name"]}')
 
 
 if __name__ == "__main__":
-    spark = SparkSession.builder.master("local[*]") \
+    ss = SparkSession.builder.master("local[*]") \
         .appName("test").getOrCreate()
 
     with open('tables/powerstation.json', 'r') as config_file:
-        config = json.load(config_file)
-        for table in config["tables"]:
+        conf = json.load(config_file)
+        for table in conf["tables"]:
             with open(f'tables/{table["filename"]}') as table_file:
                 table_config = json.load(table_file)
-                generate(spark, table_config)
+                generate(ss, table_config)
