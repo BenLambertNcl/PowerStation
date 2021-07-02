@@ -1,5 +1,5 @@
-# PowerStation
-A big data generator using Apache Spark, capable of generating massive amounts of relational data
+# WIP: PowerStation
+A work in progress, big data generator using Apache Spark, capable of generating massive amounts of relational data
 
 ## Usage
 At the moment, this is a WIP, so to generate the test data locally, run 
@@ -33,3 +33,8 @@ The table config files contain the following propeties:
     - `"from_col"` - (Required) The name of the column to use ad the from timestamp
     - `"to_col"` - (Required) The name of the column to use ad the to timestamp
     - `"current_col"` - (Optional) The name of the column to use as a boolean flag to show if the row is the current row
+
+## TODO
+- Create infra to run on cloud (AWS EMR)
+- Allow more configurability via cli
+- Externalise configuration
