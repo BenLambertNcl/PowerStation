@@ -1,0 +1,19 @@
+{
+  "name": "owner",
+  "count": 100,
+  "columns": [
+    { "name": "id", "type": "uuid4" },
+    { "name": "name", "type": "bs" },
+    { "name": "address", "type": "bs" },
+    { "name": "phoneNumber", "type": "bs" }
+  ],
+  "join_with": ["car.json"],
+  "output_columns": [
+    "id",
+    "name",
+    "address",
+    "phoneNumber",
+    "car_id",
+    "car_make"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "car",
+  "count": 10,
+  "scd": {
+    "ratio": "1:5",
+    "from_col": "from",
+    "to_col": "to",
+    "current_col": "is_current"
+  },
+  "columns": [
+    { "name": "id", "type": "uuid4" },
+    { "name": "make", "type": "bs" },
+    { "name": "model", "type": "bs" },
+    { "name": "engine", "type": "bs" },
+    { "name": "price", "type": "bs" },
+    { "name": "productionDate", "type": "date" }
+  ],
+  "output_columns": [
+    "id",
+    "make",
+    "model",
+    "engine",
+    "price",
+    "productionDate",
+    "from",
+    "to",
+    "is_current"
+  ]
+}

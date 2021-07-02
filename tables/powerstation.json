@@ -1,0 +1,10 @@
+{
+  "tables": [
+    {
+      "filename": "car.json"
+    },
+    {
+      "filename": "owner.json"
+    }
+  ]
+}
