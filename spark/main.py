@@ -85,7 +85,7 @@ def generate(spark: SparkSession, config, meta_config):
 
 
 if __name__ == "__main__":
-    ss = SparkSession.builder.master("local[*]") \
+    ss = SparkSession.builder \
         .appName("test").getOrCreate()
 
     with open('tables/powerstation.json', 'r') as config_file:
