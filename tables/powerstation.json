@@ -1,10 +1,13 @@
 {
   "tables": [
     {
-      "filename": "car.json"
+      "filename": "car",
+      "rows": 10
     },
     {
-      "filename": "owner.json"
+      "filename": "owner",
+      "rows": 100
     }
-  ]
+  ],
+  "output_file_partitions": 1
 }

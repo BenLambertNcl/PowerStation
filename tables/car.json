@@ -1,6 +1,5 @@
 {
   "name": "car",
-  "count": 10,
   "scd": {
     "ratio": "1:5",
     "from_col": "from",

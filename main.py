@@ -54,33 +54,34 @@ def create_row(row_num, max_rows, config):
     return rows
 
 
-def join_dataframes(spark, join_table, df):
+def join_dataframes(spark, join_table, df, meta_config):
     table_name = join_table.split(".")[0]
     joining_df = spark.read.json(f'output/{table_name}')
     joining_df_with_renamed_cols = joining_df.select([col(c).alias(table_name + "_" + c) for c in joining_df.columns])
-    create_join_col: Callable[[Row], Row] = lambda row: Row(**{**(row.asDict()), "joining_id": rd.randint(1, 10 + 1)})
+    joining_rows = list(filter(lambda table: table["filename"] == table_name, meta_config["tables"]))[0]["rows"]
+    create_join_col: Callable[[Row], Row] = lambda row: Row(**{**(row.asDict()), "joining_id": rd.randint(1, joining_rows + 1)})
     df_with_joining_col = df.rdd.map(create_join_col).toDF()
     return df_with_joining_col.join(joining_df_with_renamed_cols,
                                     col("joining_id") == col(f"{table_name}_row_num"),
                                     'left')
 
 
-def generate(spark: SparkSession, config):
+def generate(spark: SparkSession, config, meta_config):
     output_columns = ["row_num"] + list(map(lambda column: column["name"], config["output_columns"]))
-    rows = config["count"]
+    rows = list(filter(lambda table: table["filename"] == config["name"], meta_config["tables"]))[0]["rows"]
 
     df: DataFrame = spark.range(1, rows + 1).withColumnRenamed("id", "row_num") \
         .rdd.flatMap(lambda row: create_row(row["row_num"], rows, config)).toDF()
 
     for join_table in config.get("join_with", []):
-        df = join_dataframes(spark, join_table, df)
+        df = join_dataframes(spark, join_table, df, meta_config)
 
     df = df.select(output_columns)
 
     for column in filter(lambda col: col.get("as", None) is not None, config["output_columns"]):
         df = df.withColumnRenamed(column["name"], column["as"])
 
-    df.coalesce(1).write.mode("overwrite").option("multiline", "false").json(f'output/{config["name"]}')
+    df.coalesce(meta_config["output_file_partitions"]).write.mode("overwrite").option("multiline", "false").json(f'output/{config["name"]}')
 
 
 if __name__ == "__main__":
@@ -90,6 +91,6 @@ if __name__ == "__main__":
     with open('tables/powerstation.json', 'r') as config_file:
         conf = json.load(config_file)
         for table in conf["tables"]:
-            with open(f'tables/{table["filename"]}') as table_file:
+            with open(f'tables/{table["filename"]}.json') as table_file:
                 table_config = json.load(table_file)
-                generate(ss, table_config)
+                generate(ss, table_config, conf)

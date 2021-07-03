@@ -1,6 +1,5 @@
 {
   "name": "owner",
-  "count": 100,
   "columns": [
     { "name": "id", "type": "uuid4" },
     { "name": "name", "type": "bs" },

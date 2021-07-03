@@ -19,7 +19,6 @@ The definition files are written in JSON, which can be seen in the
 ## Table Configuration
 The table config files contain the following propeties:
 - `"name"` - (Optional) The name of the table
-- `"count"` - (Required) The number of rows to generate
 - `"columns"` - (Required) Array of object to generate
   - `"name"` - (Required) Name of the column
   - `"type"` - (Required) Faker type to generate
