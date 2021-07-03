@@ -4,8 +4,11 @@ A work in progress, big data generator using Apache Spark, capable of generating
 ## Usage
 At the moment, this is a WIP, so to generate the test data locally, run 
 ```
+cd spark
+python3 -m venv venv
+. venv/bin/activate
 pip3 install -r requirements.txt
-python3 main.py
+./run-local.sh
 ```
 
 ## Definition Files
