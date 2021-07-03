@@ -3,12 +3,17 @@ A work in progress, big data generator using Apache Spark, capable of generating
 
 ## Usage
 At the moment, this is a WIP, so to generate the test data locally, run 
-```
+```bash
 cd spark
+
+# Setup Python env
 python3 -m venv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
-./run-local.sh
+
+# Pack the dependencies and run
+venv-pack -o pyspark_venv.tar.gz
+spark-submit --master "local[*]" --archives pyspark_venv.tar.gz main.py
 ```
 
 ## Definition Files

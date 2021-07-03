@@ -55,14 +55,13 @@ def create_row(row_num, max_rows, config):
 
 
 def join_dataframes(spark, join_table, df, meta_config):
-    table_name = join_table.split(".")[0]
-    joining_df = spark.read.json(f'output/{table_name}')
-    joining_df_with_renamed_cols = joining_df.select([col(c).alias(table_name + "_" + c) for c in joining_df.columns])
-    joining_rows = list(filter(lambda table: table["filename"] == table_name, meta_config["tables"]))[0]["rows"]
+    joining_df = spark.read.json(f'output/{join_table}')
+    joining_df_with_renamed_cols = joining_df.select([col(c).alias(join_table + "_" + c) for c in joining_df.columns])
+    joining_rows = list(filter(lambda table: table["filename"] == join_table, meta_config["tables"]))[0]["rows"]
     create_join_col: Callable[[Row], Row] = lambda row: Row(**{**(row.asDict()), "joining_id": rd.randint(1, joining_rows + 1)})
     df_with_joining_col = df.rdd.map(create_join_col).toDF()
     return df_with_joining_col.join(joining_df_with_renamed_cols,
-                                    col("joining_id") == col(f"{table_name}_row_num"),
+                                    col("joining_id") == col(f"{join_table}_row_num"),
                                     'left')
 
 

@@ -6,7 +6,7 @@
     { "name": "address", "type": "bs" },
     { "name": "phoneNumber", "type": "bs" }
   ],
-  "join_with": ["car.json"],
+  "join_with": ["car"],
   "output_columns": [
     { "name": "id" },
     { "name": "name" },
