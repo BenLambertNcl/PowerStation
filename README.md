@@ -13,7 +13,11 @@ pip3 install -r requirements.txt
 
 # Pack the dependencies and run
 venv-pack -o pyspark_venv.tar.gz
-spark-submit --master "local[*]" --archives pyspark_venv.tar.gz main.py
+spark-submit --master "local[*]" \
+  --archives pyspark_venv.tar.gz \
+  main.py \
+  $(pwd)/tables \
+  $(pwd)/output
 ```
 
 ## Definition Files
