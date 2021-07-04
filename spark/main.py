@@ -6,6 +6,7 @@ from pyspark.sql.functions import col
 from faker import Faker
 import numpy.random as rd
 import json
+import sys
 
 
 def create_row(row_num, max_rows, config):
@@ -55,7 +56,7 @@ def create_row(row_num, max_rows, config):
 
 
 def join_dataframes(spark, join_table, df, meta_config):
-    joining_df = spark.read.json(f'output/{join_table}')
+    joining_df = spark.read.json(f'{output_location}/{join_table}')
     joining_df_with_renamed_cols = joining_df.select([col(c).alias(join_table + "_" + c) for c in joining_df.columns])
     joining_rows = list(filter(lambda table: table["filename"] == join_table, meta_config["tables"]))[0]["rows"]
     create_join_col: Callable[[Row], Row] = lambda row: Row(**{**(row.asDict()), "joining_id": rd.randint(1, joining_rows + 1)})
@@ -80,16 +81,19 @@ def generate(spark: SparkSession, config, meta_config):
     for column in filter(lambda col: col.get("as", None) is not None, config["output_columns"]):
         df = df.withColumnRenamed(column["name"], column["as"])
 
-    df.coalesce(meta_config["output_file_partitions"]).write.mode("overwrite").option("multiline", "false").json(f'output/{config["name"]}')
+    df.coalesce(meta_config["output_file_partitions"]).write.mode("overwrite").option("multiline", "false").json(f'{output_location}/{config["name"]}')
 
 
 if __name__ == "__main__":
     ss = SparkSession.builder \
         .appName("test").getOrCreate()
 
-    with open('tables/powerstation.json', 'r') as config_file:
+    config_location = sys.argv[1]
+    output_location = sys.argv[2] or "output"
+
+    with open(f'{config_location}/powerstation.json', 'r') as config_file:
         conf = json.load(config_file)
         for table in conf["tables"]:
-            with open(f'tables/{table["filename"]}.json') as table_file:
+            with open(f'{config_location}/{table["filename"]}.json') as table_file:
                 table_config = json.load(table_file)
                 generate(ss, table_config, conf)
