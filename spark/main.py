@@ -91,9 +91,11 @@ if __name__ == "__main__":
     config_location = sys.argv[1]
     output_location = sys.argv[2] or "output"
 
-    with open(f'{config_location}/powerstation.json', 'r') as config_file:
-        conf = json.load(config_file)
-        for table in conf["tables"]:
-            with open(f'{config_location}/{table["filename"]}.json') as table_file:
-                table_config = json.load(table_file)
-                generate(ss, table_config, conf)
+    rows = ss.read.option("multiLine", True).json(f'{config_location}/powerstation.json').collect()
+    conf = rows[0].asDict(True)
+    for table in conf["tables"]:
+        table_rows = ss.read.option("multiLine", True).json(f'{config_location}/{table["filename"]}.json').collect()
+        table_config = table_rows[0].asDict(True)
+        generate(ss, table_config, conf)
+
+    ss.stop()
