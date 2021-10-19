@@ -88,6 +88,8 @@ if __name__ == "__main__":
     ss = SparkSession.builder \
         .appName("test").getOrCreate()
 
+    ss.sparkContext.addPyFile("dependencies.zip")
+
     config_location = sys.argv[1]
     output_location = sys.argv[2] or "output"
 
