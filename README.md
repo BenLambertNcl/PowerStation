@@ -1,6 +1,11 @@
 # WIP: PowerStation
 A work in progress, big data generator using Apache Spark, capable of generating massive amounts of relational data
 
+## Requirements
+- :snake: Python3
+- :coffee: Java 1.8
+- :building: Terraform
+
 ## Usage
 At the moment, this is a WIP, so to generate the test data locally, run 
 ```bash
@@ -11,14 +16,16 @@ python3 -m venv venv
 . venv/bin/activate
 pip3 install -r requirements.txt
 
-# Pack the dependencies and run
-venv-pack -o pyspark_venv.tar.gz
 spark-submit --master "local[*]" \
-  --archives pyspark_venv.tar.gz \
   main.py \
   $(pwd)/tables \
   $(pwd)/output
 ```
+
+## Deployment
+In the future, the generator should be able to run on any spark cluster, but for now only the EMR cluster
+created using the terraform in this repo is supported. To deploy to the running cluster use the scripts
+in the `/scripts` directory
 
 ## Definition Files
 The definition files are written in JSON, which can be seen in the 
@@ -46,6 +53,8 @@ The table config files contain the following propeties:
     - `"current_col"` - (Optional) The name of the column to use as a boolean flag to show if the row is the current row
 
 ## TODO
-- Create infra to run on cloud (AWS EMR)
 - Allow more configurability via cli
 - Externalise configuration
+- Fix startup issues with cluster
+- Test performance
+- Create a CLI tool to perform setup etc

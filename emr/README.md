@@ -6,7 +6,7 @@ To create the infrastructure, simply run:
 ```shell
 terraform init && terraform apply
 ```
-This will create a basic EMR cluster and output the ID to provide to the powerstation util
+This will create a basic EMR cluster as an example. Note that at present there is an error when creating the cluster
 
 ## Backend
 The Terraform state file is by default stored locally

@@ -43,7 +43,15 @@ module "emr_cluster" {
   subnet_id                           = module.vpc.private_subnets[0]
   vpc_id                              = module.vpc.vpc_id
 
-  log_uri = "s3://${aws_s3_bucket.config.bucket}/logs"
+  bootstrap_action = [
+    {
+      name = "bootstrap"
+      path = "s3://${aws_s3_bucket.config.bucket}/setup.sh"
+      args = [aws_s3_bucket.config.bucket]
+    }
+  ]
+
+log_uri = "s3://${aws_s3_bucket.config.bucket}/logs"
 
   depends_on = [module.vpc_endpoints]
 }

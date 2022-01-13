@@ -1,3 +1,4 @@
 output/
 venv/
 pyspark_venv.tar.gz
+dependencies.zip
