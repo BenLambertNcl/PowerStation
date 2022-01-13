@@ -2,9 +2,9 @@
 A work in progress, big data generator using Apache Spark, capable of generating massive amounts of relational data
 
 ## Requirements
-- :snake: Python3
-- :coffee: Java 1.8
-- :building: Terraform
+- 🐍 Python3
+- ☕ Java 1.8
+- 🏗️ Terraform
 
 ## Usage
 At the moment, this is a WIP, so to generate the test data locally, run 
