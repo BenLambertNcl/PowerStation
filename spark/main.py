@@ -8,9 +8,7 @@ import numpy.random as rd
 import json
 import sys
 
-
-def create_row(row_num, max_rows, config):
-    fake = Faker()
+def create_row(row_num, max_rows, config, faker):
     rows = []
     row = {
         "row_num": row_num
@@ -18,7 +16,7 @@ def create_row(row_num, max_rows, config):
 
     for column in config["columns"]:
         params = column.get("params", {})
-        faker_method = getattr(fake, column["type"])
+        faker_method = getattr(faker, column["type"])
         row[column["name"]] = faker_method(**params)
 
     if config.get("scd", None):
@@ -70,8 +68,14 @@ def generate(spark: SparkSession, config, meta_config):
     output_columns = ["row_num"] + list(map(lambda column: column["name"], config["output_columns"]))
     rows = list(filter(lambda table: table["filename"] == config["name"], meta_config["tables"]))[0]["rows"]
 
-    df: DataFrame = spark.range(1, rows + 1).withColumnRenamed("id", "row_num") \
-        .rdd.flatMap(lambda row: create_row(row["row_num"], rows, config)).toDF()
+    def map_partition(elements: list):
+        faker = Faker()
+        print("Created a faker instance!")
+        for row in elements:
+            yield create_row(row["row_num"], rows, config, faker)[0]
+
+    df: DataFrame = spark.range(1, rows + 1).coalesce(3).withColumnRenamed("id", "row_num") \
+        .rdd.mapPartitions(map_partition).toDF()
 
     for join_table in config.get("join_with", []):
         df = join_dataframes(spark, join_table, df, meta_config)
