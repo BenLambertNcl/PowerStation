@@ -94,8 +94,9 @@ if __name__ == "__main__":
 
     config_location = sys.argv[1]
     output_location = sys.argv[2] or "output"
+    config_filename = sys.argv[3] or "powerstation.json"
 
-    rows = ss.read.option("multiLine", True).json(f'{config_location}/powerstation.json').collect()
+    rows = ss.read.option("multiLine", True).json(f'{config_location}/{config_filename}').collect()
     conf = rows[0].asDict(True)
     for table in conf["tables"]:
         table_rows = ss.read.option("multiLine", True).json(f'{config_location}/{table["filename"]}.json').collect()
