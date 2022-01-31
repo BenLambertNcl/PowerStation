@@ -19,7 +19,8 @@ pip3 install -r requirements.txt
 spark-submit --master "local[*]" \
   main.py \
   $(pwd)/tables \
-  $(pwd)/output
+  $(pwd)/output \
+  powerstation.json
 ```
 
 ## Deployment
@@ -51,6 +52,8 @@ The table config files contain the following propeties:
     - `"from_col"` - (Required) The name of the column to use ad the from timestamp
     - `"to_col"` - (Required) The name of the column to use ad the to timestamp
     - `"current_col"` - (Optional) The name of the column to use as a boolean flag to show if the row is the current row
+- `"output_file_partitions"` - (Optional) The number of partitions to use when writing each table
+- `"output_format"` - (Optional) The format to write the output files in `[json, csv]`
 
 ## TODO
 - Allow more configurability via cli
