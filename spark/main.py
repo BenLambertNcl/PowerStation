@@ -53,8 +53,7 @@ def create_row(row_num, max_rows, config, faker):
     return rows
 
 
-def join_dataframes(spark, join_table, df, meta_config):
-    joining_df = spark.read.json(f'{output_location}/{join_table}')
+def join_dataframes(spark, join_table, df, meta_config, joining_df):
     joining_df_with_renamed_cols = joining_df.select([col(c).alias(join_table + "_" + c) for c in joining_df.columns])
     joining_rows = list(filter(lambda table: table["filename"] == join_table, meta_config["tables"]))[0]["rows"]
     create_join_col: Callable[[Row], Row] = lambda row: Row(**{**(row.asDict()), "joining_id": rd.randint(1, joining_rows + 1)})
@@ -64,7 +63,7 @@ def join_dataframes(spark, join_table, df, meta_config):
                                     'left')
 
 
-def generate(spark: SparkSession, config, meta_config):
+def generate(spark: SparkSession, config, meta_config, dataframes) -> DataFrame:
     output_columns = ["row_num"] + list(map(lambda column: column["name"], config["output_columns"]))
     rows = list(filter(lambda table: table["filename"] == config["name"], meta_config["tables"]))[0]["rows"]
 
@@ -78,14 +77,26 @@ def generate(spark: SparkSession, config, meta_config):
         .rdd.mapPartitions(map_partition).toDF()
 
     for join_table in config.get("join_with", []):
-        df = join_dataframes(spark, join_table, df, meta_config)
+        joining_df = dataframes[join_table]
+        df = join_dataframes(spark, join_table, df, meta_config, joining_df)
 
     df = df.select(output_columns)
 
     for column in filter(lambda col: col.get("as", None) is not None, config["output_columns"]):
         df = df.withColumnRenamed(column["name"], column["as"])
 
-    df.coalesce(meta_config["output_file_partitions"]).write.mode("overwrite").option("multiline", "false").json(f'{output_location}/{config["name"]}')
+    df.persist()
+    return df
+
+
+def write(dataframes: list, config, meta_config):
+    output_type = meta_config["output_format"] if "output_format" in meta_config else "json"
+
+    for df in dataframes:
+        if output_type == "json":
+            df.coalesce(meta_config["output_file_partitions"]).write.mode("overwrite").option("multiline", "false").json(f'{output_location}/{config["name"]}')
+        elif output_type == "csv":
+            df.coalesce(meta_config["output_file_partitions"]).write.mode("overwrite").option("header", "true").csv(f'{output_location}/{config["name"]}')
 
 
 if __name__ == "__main__":
@@ -98,9 +109,20 @@ if __name__ == "__main__":
 
     rows = ss.read.option("multiLine", True).json(f'{config_location}/{config_filename}').collect()
     conf = rows[0].asDict(True)
+
+    dataframes = {}
+
     for table in conf["tables"]:
         table_rows = ss.read.option("multiLine", True).json(f'{config_location}/{table["filename"]}.json').collect()
         table_config = table_rows[0].asDict(True)
-        generate(ss, table_config, conf)
+        dataframes[table_config["name"]] = generate(ss, table_config, conf, dataframes)
+
+    for key, df in dataframes.items():
+        dataframes[key] = df.drop("row_num")
+
+    for table in conf["tables"]:
+        table_rows = ss.read.option("multiLine", True).json(f'{config_location}/{table["filename"]}.json').collect()
+        table_config = table_rows[0].asDict(True)
+        write(dataframes.values(), table_config, conf)
 
     ss.stop()

@@ -9,5 +9,6 @@
       "rows": 100
     }
   ],
-  "output_file_partitions": 1
+  "output_file_partitions": 1,
+  "output_format": "csv"
 }
